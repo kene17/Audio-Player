@@ -1,0 +1,24 @@
+.nav {
+  min-height: 10vh;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+
+  button {
+    background: transparent;
+    width: 50px;
+    border-radius: 10%;
+    cursor: pointer;
+    border: none;
+    padding: 0.5rem;
+    transition: all 0.3s ease;
+    &:hover {
+      color: white;
+      background: var(--btn-color);
+    }
+  }
+}
+
+/* .nav h1 {
+  color: var(--btn-text-color);
+} */
