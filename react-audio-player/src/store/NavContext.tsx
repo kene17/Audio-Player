@@ -13,6 +13,8 @@ type NavProviderProps = {
   toggleTheme: () => void;
   audioFile: File | null;
   setAudioFile: (file: File | null) => void;
+  audioFiles: File[];
+  addAudioFile: (file: File) => void;
 };
 
 const NavContext = createContext<NavProviderProps | undefined>(undefined);
@@ -29,6 +31,7 @@ export const NavContextProvider = ({ children }: { children: ReactNode }) => {
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [audioFiles, setAudioFiles] = useState<File[]>([]);
 
   useEffect(() => {
     document.body.setAttribute('data-theme', theme);
@@ -41,6 +44,9 @@ export const NavContextProvider = ({ children }: { children: ReactNode }) => {
   const toggleLibrary = () => {
     setIsLibraryOpen((prev) => !prev);
   };
+  const addAudioFile = (file: File) => {
+    setAudioFiles((prev) => [...prev, file]);
+  };
   return (
     <NavContext.Provider
       value={{
@@ -50,6 +56,8 @@ export const NavContextProvider = ({ children }: { children: ReactNode }) => {
         toggleTheme,
         audioFile,
         setAudioFile,
+        audioFiles,
+        addAudioFile,
       }}
     >
       {children}

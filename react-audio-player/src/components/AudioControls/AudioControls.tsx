@@ -190,24 +190,28 @@ const AudioControls: React.FC = () => {
       <div className={styles.controls}>
         <button
           onClick={handlePlayPause}
+          title='Play/Pause'
           className={styles.iconButton}
         >
           <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
         </button>
         <button
           onClick={handleStop}
+          title='Stop'
           className={styles.iconButton}
         >
           <FontAwesomeIcon icon={faStop} />
         </button>
         <button
           onClick={handleCut}
+          title='Cut'
           className={styles.iconButton}
         >
           <FontAwesomeIcon icon={faCut} />
         </button>
         <button
           onClick={handleLoop}
+          title='Loop'
           className={styles.iconButton}
         >
           <FontAwesomeIcon icon={faSyncAlt} />
