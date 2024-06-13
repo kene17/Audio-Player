@@ -6,7 +6,6 @@ import styles from './AudioPLayerCardStyles.module.css';
 
 const AudioPlayerCard = () => {
   const { audioFile } = useNav();
-  console.log('audio player', audioFile);
 
   return (
     <div className={styles.audioPlayerCard}>

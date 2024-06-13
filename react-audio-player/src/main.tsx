@@ -3,11 +3,14 @@ import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import { NavContextProvider } from './store/NavContext.tsx';
+import { BrowserRouter } from 'react-router-dom';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <NavContextProvider>
-      <App />
-    </NavContextProvider>
+    <BrowserRouter>
+      <NavContextProvider>
+        <App />
+      </NavContextProvider>
+    </BrowserRouter>
   </React.StrictMode>
 );

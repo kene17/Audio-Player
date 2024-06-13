@@ -2,13 +2,13 @@ import { useNav } from '../../store/NavContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import styles from './AudioListStyles.module.css';
+import defaultAlbumArt from '../../assets/photo1.jpg';
 
 const AudioList = () => {
   const { audioFiles, isLibraryOpen, setAudioFile, toggleLibrary } = useNav();
 
   const handleFileClick = (file: File) => {
     setAudioFile(file);
-    console.log(`Selected file: ${file.name}`);
   };
 
   return (
@@ -20,18 +20,21 @@ const AudioList = () => {
         </span>
       </h2>
       <ul>
-        {audioFiles.map((file, index) => (
+        {audioFiles.map(({ file, metadata }, index) => (
           <li
             key={index}
             onClick={() => handleFileClick(file)}
+            className={styles.audioListItem}
           >
             <img
-              src='/path/to/thumbnail.jpg'
-              alt='thumbnail'
+              src={metadata.picture || defaultAlbumArt}
+              alt='Album Art'
+              className={styles.thumbnail}
             />
-            <div className='info'>
-              <span className='name'>{file.name}</span>
-              <span className='artist'>Artist Name</span>{' '}
+            <div className={styles.info}>
+              <span className={styles.name}>{metadata.title}</span>
+              <span className={styles.artist}>{metadata.artist}</span>
+              <span className={styles.album}>{metadata.album}</span>
             </div>
           </li>
         ))}

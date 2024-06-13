@@ -19,6 +19,34 @@
   }
 }
 
+.homeLink {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+}
+
+.homeLink h1 {
+  font-family: 'Rubik', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #343a40;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  transition: color 0.3s ease, transform 0.3s ease;
+  margin: 0;
+}
+
+.homeLink h1:hover {
+  color: #2c2f36;
+  transform: scale(1.05);
+}
+
+.logo {
+  width: 40px;
+  height: auto;
+  margin-right: 0.5rem;
+}
+
 /* .nav h1 {
   color: var(--btn-text-color);
 } */
