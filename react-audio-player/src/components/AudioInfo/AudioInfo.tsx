@@ -12,7 +12,7 @@ interface AudioMetadata {
 }
 
 const AudioInfo: React.FC = () => {
-  const { audioFile } = useNav();
+  const { audioFile, audioFiles, currentFileIndex } = useNav();
   const [metadata, setMetadata] = useState<AudioMetadata>({
     title: 'Unknown Title',
     artist: 'Unknown Artist',
@@ -34,7 +34,11 @@ const AudioInfo: React.FC = () => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.audioContainer}>
-        {audioFile && <h1>Now Playing</h1>}
+        {audioFile && (
+          <h1>
+            Now Playing [{currentFileIndex + 1}/{audioFiles.length}]
+          </h1>
+        )}
         <img
           src={metadata.picture || defaultAlbumArt}
           alt='Album Art'

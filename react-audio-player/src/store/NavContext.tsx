@@ -7,7 +7,7 @@ import {
 } from 'react';
 import { extractMetadata } from '../config/config';
 
-interface AudioFileMetadata {
+interface AudioFile {
   file: File;
   metadata: {
     title: string;
@@ -24,8 +24,10 @@ type NavProviderProps = {
   toggleTheme: () => void;
   audioFile: File | null;
   setAudioFile: (file: File | null) => void;
-  audioFiles: AudioFileMetadata[];
+  audioFiles: AudioFile[];
   addAudioFile: (file: File) => void;
+  currentFileIndex: number;
+  setCurrentFileIndex: (index: number) => void;
 };
 
 const NavContext = createContext<NavProviderProps | undefined>(undefined);
@@ -42,7 +44,8 @@ export const NavContextProvider = ({ children }: { children: ReactNode }) => {
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   const [audioFile, setAudioFile] = useState<File | null>(null);
-  const [audioFiles, setAudioFiles] = useState<AudioFileMetadata[]>([]);
+  const [audioFiles, setAudioFiles] = useState<AudioFile[]>([]);
+  const [currentFileIndex, setCurrentFileIndex] = useState(0);
 
   useEffect(() => {
     document.body.setAttribute('data-theme', theme);
@@ -60,7 +63,8 @@ export const NavContextProvider = ({ children }: { children: ReactNode }) => {
   const addAudioFile = async (file: File) => {
     const metadata = await extractMetadata(file);
     setAudioFiles((prev) => [...prev, { file, metadata }]);
-    setAudioFile(file); // Set the last uploaded file as the current audio file
+    setAudioFile(file);
+    setCurrentFileIndex(audioFiles.length);
   };
 
   return (
@@ -74,6 +78,8 @@ export const NavContextProvider = ({ children }: { children: ReactNode }) => {
         setAudioFile,
         audioFiles,
         addAudioFile,
+        currentFileIndex,
+        setCurrentFileIndex,
       }}
     >
       {children}
