@@ -4,11 +4,3 @@
   align-items: center;
   padding: 20px;
 }
-
-.dropzone {
-  border: 2px dashed #bbb;
-  padding: 20px;
-  margin-bottom: 20px;
-  cursor: pointer;
-  text-align: center;
-}

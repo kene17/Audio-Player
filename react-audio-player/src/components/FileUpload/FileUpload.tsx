@@ -4,12 +4,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload } from '@fortawesome/free-solid-svg-icons';
 import { useNav } from '../../store/NavContext';
 const FileUpload = () => {
-  const { setAudioFile } = useNav();
+  const { addAudioFile } = useNav();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setAudioFile(file);
+      addAudioFile(file);
     }
   };
   return (

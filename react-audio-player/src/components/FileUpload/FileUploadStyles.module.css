@@ -6,7 +6,7 @@
 }
 
 .fileInput {
-  display: none; /* Hide the default file input */
+  display: none;
 }
 
 .fileLabel {

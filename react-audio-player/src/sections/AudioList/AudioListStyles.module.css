@@ -1,37 +1,83 @@
 .audioList {
   position: fixed;
-  left: -250px;
   top: 0;
+  left: -350px;
+  width: 350px;
   height: 100%;
-  width: 250px;
-  background: #fff;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
+  background-color: #fff;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
   overflow-y: auto;
   transition: left 0.3s ease;
+  z-index: 1000;
+  padding: 1rem;
+  display: none;
 }
 
 .audioList.open {
+  display: block;
   left: 0;
 }
 
-h2 {
-  padding: 1rem;
-  background: #007bbd;
-  color: #fff;
-  margin: 0;
+.audioList h2 {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  color: #343a40;
+  padding-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
 }
 
-ul {
-  list-style: none;
+.audioList h2 span {
+  cursor: pointer;
+}
+
+.audioList ul {
+  list-style-type: none;
   padding: 0;
   margin: 0;
 }
 
-li {
-  padding: 1rem;
-  border-bottom: 1px solid #ddd;
+.audioList li {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
 }
 
-li span {
-  color: #333;
+.audioList li:hover {
+  background-color: #e9ecef;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.audioList li img {
+  width: 50px;
+  height: 50px;
+  border-radius: 4px;
+  margin-right: 1rem;
+}
+
+.audioList li .info {
+  display: flex;
+  flex-direction: column;
+}
+
+.audioList li .info .name {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #343a40;
+}
+
+.audioList li .info .artist {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.audioList li .icon {
+  font-size: 1.2rem;
+  color: #6c757d;
 }

@@ -41,12 +41,16 @@ export const NavContextProvider = ({ children }: { children: ReactNode }) => {
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
+
   const toggleLibrary = () => {
     setIsLibraryOpen((prev) => !prev);
   };
+
   const addAudioFile = (file: File) => {
     setAudioFiles((prev) => [...prev, file]);
+    setAudioFile(file); // Set the last uploaded file as the current audio file
   };
+
   return (
     <NavContext.Provider
       value={{

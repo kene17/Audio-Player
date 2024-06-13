@@ -42,14 +42,12 @@ const AudioControls: React.FC = () => {
       });
 
       waveformRef.current.on('region-created', (region) => {
-        console.log('Region created:', region);
         region.on('click', () => {
           handleRegionSelection(region.id);
         });
       });
 
       waveformRef.current.on('region-removed', (region) => {
-        console.log('Region removed:', region);
         if (region.id === selectedRegionId) {
           setSelectedRegionId(null);
         }
@@ -110,7 +108,7 @@ const AudioControls: React.FC = () => {
     const newBufferSize = buffer.length - (endSample - startSample);
 
     if (startSample < 0 || endSample > buffer.length || newBufferSize <= 0) {
-      console.error('Invalid region boundaries');
+      console.log('Invalid region boundaries');
       return;
     }
 
