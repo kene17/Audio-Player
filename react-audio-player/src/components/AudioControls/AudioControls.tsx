@@ -3,13 +3,21 @@ import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/src/plugin/regions';
 import { useNav } from '../../store/NavContext';
 import styles from './AudioControlsStyles.module.css';
+import {
+  faPlay,
+  faPause,
+  faStop,
+  faCut,
+  faSyncAlt,
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const AudioControls: React.FC = () => {
   const { audioFile } = useNav();
   const waveformRef = useRef<WaveSurfer | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-
+  const [selectedRegionId, setSelectedRegionId] = useState<string | null>(null);
   const audioContext = useRef<AudioContext | null>(null);
 
   useEffect(() => {
@@ -18,7 +26,7 @@ const AudioControls: React.FC = () => {
         container: containerRef.current,
         waveColor: '#D9DCFF',
         progressColor: '#4353FF',
-        backend: 'MediaElement',
+        backend: 'WebAudio',
         plugins: [
           RegionsPlugin.create({
             regionsMinLength: 2,
@@ -28,6 +36,24 @@ const AudioControls: React.FC = () => {
       });
 
       waveformRef.current.load(URL.createObjectURL(audioFile));
+
+      waveformRef.current.on('ready', () => {
+        console.log('WaveSurfer is ready');
+      });
+
+      waveformRef.current.on('region-created', (region) => {
+        console.log('Region created:', region);
+        region.on('click', () => {
+          handleRegionSelection(region.id);
+        });
+      });
+
+      waveformRef.current.on('region-removed', (region) => {
+        console.log('Region removed:', region);
+        if (region.id === selectedRegionId) {
+          setSelectedRegionId(null);
+        }
+      });
     }
 
     return () => waveformRef.current?.destroy();
@@ -46,30 +72,51 @@ const AudioControls: React.FC = () => {
   };
 
   const handleCut = () => {
-    if (!waveformRef.current || !waveformRef.current.regions) return;
-    const regions = Object.values(waveformRef.current.regions.list);
-    regions.forEach((region) => {
-      const { start, end } = region;
-      removeAudioRegion(start, end);
-      waveformRef.current?.removeRegion(region.id);
-    });
+    if (!waveformRef.current || !selectedRegionId) {
+      console.log('No region selected or WaveSurfer not initialized');
+      return;
+    }
+
+    const regions = waveformRef.current.regions?.list;
+    if (!regions) {
+      console.log('No regions object found on waveform');
+      return;
+    }
+
+    const region = regions[selectedRegionId];
+    if (region) {
+      console.log(`Cutting region from ${region.start} to ${region.end}`);
+      cutAudioRegion(region.start, region.end);
+      region.remove();
+      console.log(`Region with id ${selectedRegionId} has been cut.`);
+    } else {
+      console.log(`Region with id ${selectedRegionId} not found`);
+    }
   };
 
-  const removeAudioRegion = (start: number, end: number) => {
+  const cutAudioRegion = async (start: number, end: number) => {
     if (!waveformRef.current) return;
 
     if (!audioContext.current) {
-      audioContext.current = new (window.AudioContext ||
-        window.webkitAudioContext)();
+      audioContext.current = new AudioContext();
     }
 
-    const buffer = waveformRef.current.backend.buffer;
+    const buffer = (waveformRef.current.backend as any).buffer;
     if (!buffer) return;
 
     const sampleRate = buffer.sampleRate;
+    const startSample = Math.round(start * sampleRate);
+    const endSample = Math.round(end * sampleRate);
+    const newBufferSize = buffer.length - (endSample - startSample);
+
+    if (startSample < 0 || endSample > buffer.length || newBufferSize <= 0) {
+      console.error('Invalid region boundaries');
+      return;
+    }
+
     const newBuffer = audioContext.current.createBuffer(
       buffer.numberOfChannels,
-      (buffer.duration - (end - start)) * sampleRate,
+      newBufferSize,
       sampleRate
     );
 
@@ -77,24 +124,61 @@ const AudioControls: React.FC = () => {
       const oldChannelData = buffer.getChannelData(i);
       const newChannelData = newBuffer.getChannelData(i);
 
-      const beforeRegion = oldChannelData.subarray(0, start * sampleRate);
-      const afterRegion = oldChannelData.subarray(end * sampleRate);
+      newChannelData.set(oldChannelData.subarray(0, startSample));
 
-      newChannelData.set(beforeRegion);
-      newChannelData.set(afterRegion, beforeRegion.length);
+      newChannelData.set(oldChannelData.subarray(endSample), startSample);
     }
 
-    waveformRef.current.backend.setBuffer(newBuffer);
-    waveformRef.current.drawBuffer();
+    const offlineAudioContext = new OfflineAudioContext(
+      newBuffer.numberOfChannels,
+      newBuffer.length,
+      sampleRate
+    );
+    const bufferSource = offlineAudioContext.createBufferSource();
+    bufferSource.buffer = newBuffer;
+
+    bufferSource.connect(offlineAudioContext.destination);
+    bufferSource.start();
+
+    const renderedBuffer = await offlineAudioContext.startRendering();
+
+    waveformRef.current.empty();
+    waveformRef.current.loadDecodedBuffer(renderedBuffer);
+
+    console.log(`Region from ${start} to ${end} removed from audio.`);
   };
 
   const handleLoop = () => {
-    waveformRef.current?.addRegion({
-      start: 1,
-      end: 3,
-      loop: true,
-      color: 'hsla(400, 100%, 30%, 0.5)',
-    });
+    if (!selectedRegionId) {
+      console.log('No region selected for looping');
+      return;
+    }
+
+    const regions = waveformRef.current?.regions?.list;
+    const region = regions?.[selectedRegionId];
+    if (region) {
+      waveformRef.current?.addRegion({
+        id: 'loop-region',
+        start: region.start,
+        end: region.end,
+        loop: true,
+        color: 'hsla(400, 100%, 30%, 0.5)',
+      });
+
+      console.log(
+        `Loop region created from ${region.start} to ${region.end} seconds.`
+      );
+    }
+  };
+
+  const handleRegionSelection = (regionId: string) => {
+    const region = waveformRef.current?.regions?.list[regionId];
+    if (region) {
+      setSelectedRegionId(regionId);
+      console.log(
+        `Region with id ${regionId} selected from ${region.start} to ${region.end}`
+      );
+    }
   };
 
   return (
@@ -104,12 +188,30 @@ const AudioControls: React.FC = () => {
         className={styles.waveformContainer}
       ></div>
       <div className={styles.controls}>
-        <button onClick={handlePlayPause}>
-          {isPlaying ? 'Pause' : 'Play'}
+        <button
+          onClick={handlePlayPause}
+          className={styles.iconButton}
+        >
+          <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
         </button>
-        <button onClick={handleStop}>Stop</button>
-        <button onClick={handleCut}>Cut</button>
-        <button onClick={handleLoop}>Loop</button>
+        <button
+          onClick={handleStop}
+          className={styles.iconButton}
+        >
+          <FontAwesomeIcon icon={faStop} />
+        </button>
+        <button
+          onClick={handleCut}
+          className={styles.iconButton}
+        >
+          <FontAwesomeIcon icon={faCut} />
+        </button>
+        <button
+          onClick={handleLoop}
+          className={styles.iconButton}
+        >
+          <FontAwesomeIcon icon={faSyncAlt} />
+        </button>
       </div>
     </div>
   );

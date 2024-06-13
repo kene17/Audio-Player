@@ -1,0 +1,37 @@
+.audioList {
+  position: fixed;
+  left: -250px;
+  top: 0;
+  height: 100%;
+  width: 250px;
+  background: #fff;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+  transition: left 0.3s ease;
+}
+
+.audioList.open {
+  left: 0;
+}
+
+h2 {
+  padding: 1rem;
+  background: #007bbd;
+  color: #fff;
+  margin: 0;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+}
+
+li span {
+  color: #333;
+}
