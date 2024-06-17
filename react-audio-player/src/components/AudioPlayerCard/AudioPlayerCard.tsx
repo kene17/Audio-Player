@@ -5,12 +5,12 @@ import { useNav } from '../../store/NavContext';
 import styles from './AudioPLayerCardStyles.module.css';
 
 const AudioPlayerCard = () => {
-  const { audioFile } = useNav();
+  const { currentAudioFile } = useNav();
 
   return (
     <div className={styles.audioPlayerCard}>
       <FileUpload />
-      {audioFile && (
+      {currentAudioFile && (
         <>
           <AudioInfo />
           <AudioControls />

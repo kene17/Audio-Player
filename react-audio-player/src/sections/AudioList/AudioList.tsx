@@ -1,40 +1,39 @@
-import { useNav } from '../../store/NavContext';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import React from 'react';
+import { AudioFile, useNav } from '../../store/NavContext';
 import styles from './AudioListStyles.module.css';
 import defaultAlbumArt from '../../assets/photo1.jpg';
 
-const AudioList = () => {
-  const { audioFiles, isLibraryOpen, setAudioFile, toggleLibrary } = useNav();
+const AudioList: React.FC = () => {
+  const { audioFiles, isLibraryOpen, toggleLibrary, setCurrentAudioFile } =
+    useNav();
 
-  const handleFileClick = (file: File) => {
-    setAudioFile(file);
+  const handleFileClick = (audioFile: AudioFile) => {
+    const fileUrl = `${audioFile.url}`;
+    setCurrentAudioFile({ ...audioFile, url: fileUrl });
   };
 
   return (
     <div className={`${styles.audioList} ${isLibraryOpen ? styles.open : ''}`}>
       <h2>
         Library
-        <span onClick={toggleLibrary}>
-          <FontAwesomeIcon icon={faTimes} />
-        </span>
+        <span onClick={toggleLibrary}>✖</span>
       </h2>
       <ul>
-        {audioFiles.map(({ file, metadata }, index) => (
+        {audioFiles.map((audio, index) => (
           <li
             key={index}
-            onClick={() => handleFileClick(file)}
+            onClick={() => handleFileClick(audio)}
             className={styles.audioListItem}
           >
             <img
-              src={metadata.picture || defaultAlbumArt}
+              src={defaultAlbumArt}
               alt='Album Art'
               className={styles.thumbnail}
             />
             <div className={styles.info}>
-              <span className={styles.name}>{metadata.title}</span>
-              <span className={styles.artist}>{metadata.artist}</span>
-              <span className={styles.album}>{metadata.album}</span>
+              <span className={styles.name}>{audio.title}</span>
+              <span className={styles.artist}>{audio.artist}</span>
+              <span className={styles.album}>{audio.album}</span>
             </div>
           </li>
         ))}

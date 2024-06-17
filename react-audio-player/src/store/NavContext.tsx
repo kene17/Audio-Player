@@ -5,52 +5,65 @@ import {
   useContext,
   useEffect,
 } from 'react';
-import { extractMetadata } from '../config/config';
 
-interface AudioFile {
-  file: File;
-  metadata: {
-    title: string;
-    artist: string;
-    album: string;
-    picture: string | null;
-  };
+export interface AudioFile {
+  title: string;
+  artist: string;
+  album: string;
+  url: string;
 }
 
-type NavProviderProps = {
-  isLibraryOpen: boolean;
-  toggleLibrary: () => void;
+interface NavContextProps {
   theme: string;
   toggleTheme: () => void;
-  audioFile: File | null;
-  setAudioFile: (file: File | null) => void;
+  isLibraryOpen: boolean;
+  toggleLibrary: () => void;
   audioFiles: AudioFile[];
-  addAudioFile: (file: File) => void;
-  currentFileIndex: number;
-  setCurrentFileIndex: (index: number) => void;
-};
+  currentAudioFile: AudioFile | null;
+  setCurrentAudioFile: (audioFile: AudioFile) => void;
+  addAudioFile: (audioFile: AudioFile) => void;
+  setAudioFiles: (audioFiles: AudioFile[]) => void;
+}
 
-const NavContext = createContext<NavProviderProps | undefined>(undefined);
-
+const NavContext = createContext<NavContextProps | undefined>(undefined);
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 export const useNav = () => {
   const context = useContext(NavContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useNav must be used within a NavProvider');
   }
   return context;
 };
 
 export const NavContextProvider = ({ children }: { children: ReactNode }) => {
-  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
-  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [audioFiles, setAudioFiles] = useState<AudioFile[]>([]);
-  const [currentFileIndex, setCurrentFileIndex] = useState(0);
+  const [currentAudioFile, setCurrentAudioFile] = useState<AudioFile | null>(
+    null
+  );
+
+  const fetchAudioFiles = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/audios`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch audio files');
+      }
+      const data = await response.json();
+      setAudioFiles(data);
+    } catch (error) {
+      console.error('Failed to load audio files:', error);
+    }
+  };
 
   useEffect(() => {
     document.body.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    fetchAudioFiles();
+  }, []);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
@@ -60,26 +73,23 @@ export const NavContextProvider = ({ children }: { children: ReactNode }) => {
     setIsLibraryOpen((prev) => !prev);
   };
 
-  const addAudioFile = async (file: File) => {
-    const metadata = await extractMetadata(file);
-    setAudioFiles((prev) => [...prev, { file, metadata }]);
-    setAudioFile(file);
-    setCurrentFileIndex(audioFiles.length);
+  const addAudioFile = (audioFile: AudioFile) => {
+    setAudioFiles((prev) => [...prev, audioFile]);
+    setCurrentAudioFile(audioFile); //This sets the newly added file as the current audio file
   };
 
   return (
     <NavContext.Provider
       value={{
         theme,
+        toggleTheme,
         isLibraryOpen,
         toggleLibrary,
-        toggleTheme,
-        audioFile,
-        setAudioFile,
         audioFiles,
+        currentAudioFile,
+        setCurrentAudioFile,
         addAudioFile,
-        currentFileIndex,
-        setCurrentFileIndex,
+        setAudioFiles,
       }}
     >
       {children}

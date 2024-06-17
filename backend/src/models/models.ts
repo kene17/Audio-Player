@@ -1,12 +1,12 @@
-import { Schema, model } from 'mongoose';
+import mongoose from 'mongoose';
 
-const audioSchema = new Schema({
-  title: { type: String, required: false },
-  artist: { type: String, required: true },
-  album: { type: String, required: false },
+const audioSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  artist: { type: String, default: 'Unknown Artist' },
+  album: { type: String, default: 'Unknown Album' },
   url: { type: String, required: true },
 });
 
-const Audio = model('Audio', audioSchema);
+const Audio = mongoose.model('Audio', audioSchema);
 
 export default Audio;

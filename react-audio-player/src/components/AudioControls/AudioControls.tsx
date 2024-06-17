@@ -13,15 +13,15 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const AudioControls: React.FC = () => {
-  const { audioFile } = useNav();
+  const { currentAudioFile } = useNav();
+
   const waveformRef = useRef<WaveSurfer | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedRegionId, setSelectedRegionId] = useState<string | null>(null);
-  const audioContext = useRef<AudioContext | null>(null);
 
   useEffect(() => {
-    if (containerRef.current && audioFile) {
+    if (containerRef.current && currentAudioFile) {
       waveformRef.current = WaveSurfer.create({
         container: containerRef.current,
         waveColor: '#D9DCFF',
@@ -35,7 +35,7 @@ const AudioControls: React.FC = () => {
         ],
       });
 
-      waveformRef.current.load(URL.createObjectURL(audioFile));
+      waveformRef.current.load(currentAudioFile.url);
 
       waveformRef.current.on('ready', () => {
         console.log('WaveSurfer is ready');
@@ -52,10 +52,12 @@ const AudioControls: React.FC = () => {
           setSelectedRegionId(null);
         }
       });
-    }
 
-    return () => waveformRef.current?.destroy();
-  }, [audioFile]);
+      return () => {
+        waveformRef.current?.destroy();
+      };
+    }
+  }, [currentAudioFile]);
 
   const handlePlayPause = () => {
     if (waveformRef.current) {
@@ -95,10 +97,8 @@ const AudioControls: React.FC = () => {
   const cutAudioRegion = async (start: number, end: number) => {
     if (!waveformRef.current) return;
 
-    if (!audioContext.current) {
-      audioContext.current = new AudioContext();
-    }
-
+    const audioContext = new (window.AudioContext ||
+      (window as any).webkitAudioContext)();
     const buffer = (waveformRef.current.backend as any).buffer;
     if (!buffer) return;
 
@@ -112,7 +112,7 @@ const AudioControls: React.FC = () => {
       return;
     }
 
-    const newBuffer = audioContext.current.createBuffer(
+    const newBuffer = audioContext.createBuffer(
       buffer.numberOfChannels,
       newBufferSize,
       sampleRate
@@ -123,7 +123,6 @@ const AudioControls: React.FC = () => {
       const newChannelData = newBuffer.getChannelData(i);
 
       newChannelData.set(oldChannelData.subarray(0, startSample));
-
       newChannelData.set(oldChannelData.subarray(endSample), startSample);
     }
 
