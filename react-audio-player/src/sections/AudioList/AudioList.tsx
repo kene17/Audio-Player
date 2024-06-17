@@ -9,6 +9,8 @@ const AudioList: React.FC = () => {
 
   const handleFileClick = (audioFile: AudioFile) => {
     const fileUrl = `${audioFile.url}`;
+    console.log('file', fileUrl);
+
     setCurrentAudioFile({ ...audioFile, url: fileUrl });
   };
 

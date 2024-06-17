@@ -57,7 +57,7 @@ const AudioControls: React.FC = () => {
         waveformRef.current?.destroy();
       };
     }
-  }, [currentAudioFile]);
+  }, [currentAudioFile, selectedRegionId]);
 
   const handlePlayPause = () => {
     if (waveformRef.current) {
