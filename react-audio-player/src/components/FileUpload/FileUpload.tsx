@@ -3,6 +3,7 @@ import { useNav } from '../../store/NavContext';
 import styles from './FileUploadStyles.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload } from '@fortawesome/free-solid-svg-icons';
+import { uploadAudioFile } from '../../api/apiClient';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 const FileUpload: React.FC = () => {
@@ -13,20 +14,8 @@ const FileUpload: React.FC = () => {
 
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append('file', file);
-
     try {
-      const response = await fetch(`${API_BASE_URL}/api/audios`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('File upload failed');
-      }
-
-      const audioData = await response.json();
+      const audioData = await uploadAudioFile(file);
       const fileUrl = `${API_BASE_URL}${audioData.url}`;
       addAudioFile({ ...audioData, url: fileUrl });
     } catch (error) {

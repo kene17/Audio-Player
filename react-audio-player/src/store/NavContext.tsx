@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
 } from 'react';
+import { fetchAudioFiles } from '../api/apiClient';
 
 export interface AudioFile {
   title: string;
@@ -26,7 +27,7 @@ interface NavContextProps {
 }
 
 const NavContext = createContext<NavContextProps | undefined>(undefined);
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+
 export const useNav = () => {
   const context = useContext(NavContext);
   if (!context) {
@@ -43,26 +44,22 @@ export const NavContextProvider = ({ children }: { children: ReactNode }) => {
     null
   );
 
-  const fetchAudioFiles = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/audios`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch audio files');
-      }
-      const data = await response.json();
-      setAudioFiles(data);
-    } catch (error) {
-      console.error('Failed to load audio files:', error);
-    }
-  };
-
   useEffect(() => {
     document.body.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
 
   useEffect(() => {
-    fetchAudioFiles();
+    const loadAudioFiles = async () => {
+      try {
+        const data = await fetchAudioFiles();
+        setAudioFiles(data);
+      } catch (error) {
+        console.error('Failed to load audio files:', error);
+      }
+    };
+
+    loadAudioFiles();
   }, []);
 
   const toggleTheme = () => {
